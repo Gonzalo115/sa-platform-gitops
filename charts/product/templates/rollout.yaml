@@ -1,0 +1,103 @@
+{{- if .Values.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ include "sa-service.fullname" . }}
+  labels:
+    {{- include "sa-service.labels" . | nindent 4 }}
+spec:
+  replicas: {{ default 2 .Values.replicaCount }}
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      {{- include "sa-service.selectorLabels" . | nindent 6 }}
+  strategy:
+    canary:
+      stableService: {{ include "sa-service.fullname" . }}
+      canaryService: {{ include "sa-service.fullname" . }}-canary
+      maxUnavailable: 0
+      maxSurge: 1
+      scaleDownDelaySeconds: {{ default 30 .Values.canary.scaleDownDelaySeconds }}
+      steps:
+        {{- range .Values.canary.steps }}
+        - setWeight: {{ .weight }}
+        - pause:
+            duration: {{ .pause | quote }}
+        - analysis:
+            templates:
+              - templateName: {{ $.Values.analysisTemplateName }}
+            args:
+              - name: service-url
+                value: {{ printf "http://%s-canary:%v%s" (include "sa-service.fullname" $) $.Values.port $.Values.healthPath | quote }}
+        {{- end }}
+  template:
+    metadata:
+      labels:
+        {{- include "sa-service.selectorLabels" . | nindent 8 }}
+        sa-platform/component: {{ include "sa-service.name" . | quote }}
+    spec:
+      serviceAccountName: {{ default "sa-platform-runtime" .Values.global.serviceAccountName }}
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: {{ include "sa-service.name" . }}
+          image: {{ printf "%s:%s" (required "Debe definir image.repository" .Values.image.repository) (required "Debe definir image.tag" .Values.image.tag) | quote }}
+          imagePullPolicy: {{ default "IfNotPresent" .Values.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - name: http
+              containerPort: {{ .Values.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "sa-service.fullname" . }}-config
+            - secretRef:
+                name: {{ .Values.global.kafkaSecretName }}
+            {{- if .Values.secretName }}
+            - secretRef:
+                name: {{ .Values.secretName }}
+            {{- end }}
+            {{- if .Values.jwtSecretName }}
+            - secretRef:
+                name: {{ .Values.jwtSecretName }}
+            {{- end }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.healthPath }}
+              port: http
+            periodSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.healthPath }}
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.healthPath }}
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+{{- end }}
+

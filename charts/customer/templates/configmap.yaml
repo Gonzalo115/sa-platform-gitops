@@ -1,0 +1,16 @@
+{{- if .Values.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "sa-service.fullname" . }}-config
+  labels:
+    {{- include "sa-service.labels" . | nindent 4 }}
+data:
+  PORT: {{ required "Debe definir port" .Values.port | quote }}
+  KAFKA_BROKERS: {{ required "Debe definir global.kafkaBrokers" .Values.global.kafkaBrokers | quote }}
+  KAFKA_SECURITY_PROTOCOL: {{ default "SASL_PLAINTEXT" .Values.global.kafkaSecurityProtocol | quote }}
+  {{- range $key, $value := .Values.env }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}
+

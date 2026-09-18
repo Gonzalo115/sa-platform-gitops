@@ -1,0 +1,7 @@
+apiVersion: v2
+name: kafka
+description: Kafka KRaft de un nodo para SA Platform
+type: application
+version: 1.0.0
+appVersion: "3.9.1"
+

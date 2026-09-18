@@ -1,0 +1,29 @@
+api-gateway:
+  replicaCount: 1
+  image:
+    tag: "1.0.0-dev"
+authentication:
+  replicaCount: 1
+  image:
+    tag: "1.0.0-dev"
+authorization:
+  replicaCount: 1
+  image:
+    tag: "1.0.0-dev"
+customer:
+  replicaCount: 1
+  image:
+    tag: "1.0.0-dev"
+order:
+  replicaCount: 1
+  image:
+    tag: "1.0.0-dev"
+payment:
+  replicaCount: 1
+  image:
+    tag: "1.0.0-dev"
+product:
+  replicaCount: 1
+  image:
+    tag: "1.0.0-dev"
+

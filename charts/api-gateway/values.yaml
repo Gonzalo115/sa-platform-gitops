@@ -1,0 +1,50 @@
+enabled: true
+replicaCount: 2
+
+image:
+  repository: ghcr.io/example/sa-api-gateway
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+
+port: 3000
+healthPath: /api/health
+analysisPath: /api/products
+secretName: ""
+jwtSecretName: sa-platform-jwt-secret
+
+global:
+  kafkaBrokers: sa-platform-kafka:29092
+  kafkaSecurityProtocol: SASL_PLAINTEXT
+  kafkaSecretName: sa-platform-kafka-secret
+  serviceAccountName: sa-platform-runtime
+
+env:
+  SERVICE_NAME: api-gateway
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 96Mi
+  limits:
+    cpu: 500m
+    memory: 384Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+pdb:
+  minAvailable: 1
+
+analysisTemplateName: sa-platform-canary-analysis
+canary:
+  scaleDownDelaySeconds: 30
+  steps:
+    - weight: 10
+      pause: 20s
+    - weight: 30
+      pause: 20s
+    - weight: 60
+      pause: 30s

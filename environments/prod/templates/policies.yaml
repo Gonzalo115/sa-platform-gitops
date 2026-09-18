@@ -1,0 +1,68 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: p8-disallow-latest
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: require-immutable-tag
+      match:
+        any:
+          - resources:
+              kinds: ["Pod"]
+              namespaces: ["sa-p8"]
+      validate:
+        message: "Las imagenes deben usar una etiqueta inmutable distinta de latest."
+        pattern:
+          spec:
+            containers:
+              - "image": "!*:latest"
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: p8-require-resources
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: require-requests-and-limits
+      match:
+        any:
+          - resources:
+              kinds: ["Pod"]
+              namespaces: ["sa-p8"]
+      validate:
+        message: "Cada contenedor debe declarar requests y limits de CPU y memoria."
+        pattern:
+          spec:
+            containers:
+              - resources:
+                  requests:
+                    cpu: "?*"
+                    memory: "?*"
+                  limits:
+                    cpu: "?*"
+                    memory: "?*"
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: p8-require-nonroot
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: require-run-as-non-root
+      match:
+        any:
+          - resources:
+              kinds: ["Pod"]
+              namespaces: ["sa-p8"]
+      validate:
+        message: "Los Pods deben ejecutar como usuario no root."
+        pattern:
+          spec:
+            securityContext:
+              runAsNonRoot: true

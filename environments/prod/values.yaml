@@ -1,0 +1,125 @@
+global: &global
+  kafkaBrokers: sa-platform-kafka:29092
+  kafkaSecurityProtocol: SASL_PLAINTEXT
+  kafkaSecretName: sa-platform-kafka-secret
+  serviceAccountName: sa-platform-runtime
+
+api-gateway:
+  replicaCount: 2
+  image:
+    repository: "ghcr.io/gonzalo115/sa-api-gateway"
+    tag: "1.0.0"
+  port: 3000
+  healthPath: /api/health
+  analysisPath: /api/products
+  jwtSecretName: sa-platform-jwt-secret
+  global: *global
+  resources:
+    requests: {cpu: 50m, memory: 96Mi}
+    limits: {cpu: 500m, memory: 384Mi}
+
+authentication:
+  replicaCount: 2
+  image:
+    repository: "ghcr.io/gonzalo115/sa-authentication-ms"
+    tag: "1.0.0"
+  port: 3003
+  healthPath: /health
+  secretName: sa-platform-authentication-db-secret
+  jwtSecretName: sa-platform-jwt-secret
+  global: *global
+  resources:
+    requests: {cpu: 50m, memory: 128Mi}
+    limits: {cpu: 500m, memory: 512Mi}
+
+authorization:
+  replicaCount: 2
+  image:
+    repository: "ghcr.io/gonzalo115/sa-authorization-ms"
+    tag: "1.0.0"
+  port: 3004
+  healthPath: /health
+  secretName: sa-platform-authorization-db-secret
+  jwtSecretName: ""
+  global: *global
+  resources:
+    requests: {cpu: 50m, memory: 128Mi}
+    limits: {cpu: 500m, memory: 512Mi}
+
+customer:
+  replicaCount: 2
+  image:
+    repository: "ghcr.io/gonzalo115/sa-customer-ms"
+    tag: "1.0.0"
+  port: 8001
+  healthPath: /health
+  secretName: sa-platform-customer-db-secret
+  jwtSecretName: ""
+  global: *global
+  resources:
+    requests: {cpu: 50m, memory: 96Mi}
+    limits: {cpu: 400m, memory: 384Mi}
+
+order:
+  replicaCount: 2
+  image:
+    repository: "ghcr.io/gonzalo115/sa-order-ms"
+    tag: "1.0.0"
+  port: 3002
+  healthPath: /health
+  secretName: sa-platform-order-db-secret
+  jwtSecretName: ""
+  global: *global
+  resources:
+    requests: {cpu: 50m, memory: 128Mi}
+    limits: {cpu: 500m, memory: 512Mi}
+
+payment:
+  replicaCount: 2
+  image:
+    repository: "ghcr.io/gonzalo115/sa-payment-ms"
+    tag: "1.0.0"
+  port: 8002
+  healthPath: /health
+  secretName: sa-platform-payment-db-secret
+  jwtSecretName: ""
+  global: *global
+  resources:
+    requests: {cpu: 50m, memory: 96Mi}
+    limits: {cpu: 400m, memory: 384Mi}
+
+product:
+  replicaCount: 2
+  image:
+    repository: "ghcr.io/gonzalo115/sa-product-ms"
+    tag: "1.0.0"
+  port: 3001
+  healthPath: /health
+  secretName: sa-platform-product-db-secret
+  jwtSecretName: ""
+  global: *global
+  resources:
+    requests: {cpu: 50m, memory: 128Mi}
+    limits: {cpu: 500m, memory: 512Mi}
+
+kafka:
+  enabled: true
+  image:
+    repository: apache/kafka
+    tag: "3.9.1"
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: ""
+  resources:
+    requests: {cpu: 100m, memory: 512Mi}
+    limits: {cpu: 750m, memory: 1Gi}
+
+ingress:
+  enabled: true
+  className: nginx
+  host: ""
+
+sealedSecretExample:
+  enabled: false
+  encryptedValue: ""

@@ -1,0 +1,19 @@
+enabled: true
+image:
+  repository: apache/kafka
+  tag: "3.9.1"
+  pullPolicy: IfNotPresent
+clusterId: MkU3OEVBNTcwNTJENDM2Qk
+secretName: sa-platform-kafka-secret
+persistence:
+  enabled: true
+  size: 5Gi
+  storageClass: ""
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    cpu: 750m
+    memory: 1Gi
+
