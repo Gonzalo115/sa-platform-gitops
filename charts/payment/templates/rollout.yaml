@@ -17,7 +17,6 @@ spec:
       canaryService: {{ include "sa-service.fullname" . }}-canary
       maxUnavailable: 0
       maxSurge: 1
-      scaleDownDelaySeconds: {{ default 30 .Values.canary.scaleDownDelaySeconds }}
       steps:
         {{- range .Values.canary.steps }}
         - setWeight: {{ .weight }}
