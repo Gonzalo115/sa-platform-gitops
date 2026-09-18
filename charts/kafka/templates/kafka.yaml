@@ -162,10 +162,10 @@ spec:
           command: ["sh", "-c"]
           args:
             - |
-              until /opt/kafka/bin/kafka-topics.sh --bootstrap-server sa-platform-kafka:29092 --command-config /etc/kafka/secrets/client.properties --list >/dev/null 2>&1; do sleep 3; done
+              until /opt/kafka/bin/kafka-topics.sh --bootstrap-server {{ .Release.Name }}-kafka:29092 --command-config /etc/kafka/secrets/client.properties --list >/dev/null 2>&1; do sleep 3; done
               for topic in auth.register auth.login auth.refresh auth.logout auth.me authorization.bootstrap authorization.check authorization.roles authorization.permissions product.create product.get product.list product.update product.reserve order.create order.get order.list order.cancel payment.create payment.get payment.refund payment.completed payment.failed customer.upsert customer.get customer.address.create cron.summary.generated; do
-                /opt/kafka/bin/kafka-topics.sh --bootstrap-server sa-platform-kafka:29092 --command-config /etc/kafka/secrets/client.properties --create --if-not-exists --topic "$topic" --partitions 3 --replication-factor 1
-                /opt/kafka/bin/kafka-topics.sh --bootstrap-server sa-platform-kafka:29092 --command-config /etc/kafka/secrets/client.properties --create --if-not-exists --topic "$topic.reply" --partitions 3 --replication-factor 1
+                /opt/kafka/bin/kafka-topics.sh --bootstrap-server {{ .Release.Name }}-kafka:29092 --command-config /etc/kafka/secrets/client.properties --create --if-not-exists --topic "$topic" --partitions 3 --replication-factor 1
+                /opt/kafka/bin/kafka-topics.sh --bootstrap-server {{ .Release.Name }}-kafka:29092 --command-config /etc/kafka/secrets/client.properties --create --if-not-exists --topic "$topic.reply" --partitions 3 --replication-factor 1
               done
           resources:
             requests:
