@@ -57,6 +57,7 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.port }}
+              protocol: TCP
           envFrom:
             - configMapRef:
                 name: {{ include "sa-service.fullname" . }}-config
