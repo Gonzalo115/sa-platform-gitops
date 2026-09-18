@@ -39,7 +39,6 @@ pdb:
 
 analysisTemplateName: sa-platform-canary-analysis
 canary:
-  scaleDownDelaySeconds: 30
   steps:
     - weight: 10
       pause: 20s
