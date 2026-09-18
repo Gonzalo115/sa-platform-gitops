@@ -1,0 +1,27 @@
+dependencies:
+- name: api-gateway
+  repository: file://../../charts/api-gateway
+  version: 1.0.0
+- name: authentication
+  repository: file://../../charts/authentication
+  version: 1.0.0
+- name: authorization
+  repository: file://../../charts/authorization
+  version: 1.0.0
+- name: customer
+  repository: file://../../charts/customer
+  version: 1.0.0
+- name: order
+  repository: file://../../charts/order
+  version: 1.0.0
+- name: payment
+  repository: file://../../charts/payment
+  version: 1.0.0
+- name: product
+  repository: file://../../charts/product
+  version: 1.0.0
+- name: kafka
+  repository: file://../../charts/kafka
+  version: 1.0.0
+digest: sha256:0086a65218d7f07b9bbc287a45034f32b74ae6c806753bc42d0ef8de8e8b812b
+generated: "2026-09-18T21:20:09.027776107Z"
