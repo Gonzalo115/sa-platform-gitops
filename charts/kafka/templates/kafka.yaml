@@ -135,7 +135,6 @@ metadata:
   name: {{ .Release.Name }}-kafka-topics-{{ .Release.Revision }}
 spec:
   backoffLimit: 10
-  ttlSecondsAfterFinished: 600
   template:
     metadata:
       labels:
