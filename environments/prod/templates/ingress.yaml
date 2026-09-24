@@ -17,13 +17,13 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: sa-platform-api-gateway
+                name: sa-platform-prod-api-gateway
                 port:
                   number: 3000
   {{- else }}
   defaultBackend:
     service:
-      name: sa-platform-api-gateway
+      name: sa-platform-prod-api-gateway
       port:
         number: 3000
   {{- end }}
