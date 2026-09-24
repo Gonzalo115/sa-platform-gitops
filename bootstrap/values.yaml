@@ -1,0 +1,12 @@
+gitops:
+  repoURL: https://github.com/Gonzalo115/sa-platform-gitops.git
+  targetRevision: main
+
+platform:
+  projectId: practicas-509615
+  region: us-central1
+  zone: us-central1-a
+  clusterName: sa-cluster-p9
+  veleroBucket: practicas-509615-p9-velero
+  externalSecretsGsa: p9-external-secrets@practicas-509615.iam.gserviceaccount.com
+  veleroGsa: p9-velero@practicas-509615.iam.gserviceaccount.com

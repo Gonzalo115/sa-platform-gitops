@@ -1,0 +1,19 @@
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: p9-sa-platform
+  namespace: velero
+spec:
+  schedule: {{ .Values.schedule | quote }}
+  useOwnerReferencesInBackup: false
+  template:
+    includedNamespaces:
+      - sa-p8
+    defaultVolumesToFsBackup: true
+    snapshotVolumes: false
+    storageLocation: default
+    ttl: {{ .Values.retention }}
+    metadata:
+      labels:
+        practice: p9
+        purpose: disaster-recovery

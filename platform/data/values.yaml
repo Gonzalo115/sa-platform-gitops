@@ -1,0 +1,12 @@
+image:
+  repository: postgres
+  tag: "16.4-bookworm"
+  pullPolicy: IfNotPresent
+
+persistence:
+  size: 10Gi
+  storageClass: standard-rwo
+
+resources:
+  requests: {cpu: 100m, memory: 256Mi}
+  limits: {cpu: 750m, memory: 1Gi}

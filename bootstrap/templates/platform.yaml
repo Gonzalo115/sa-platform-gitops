@@ -1,0 +1,118 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: p9-foundation
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.gitops.repoURL | quote }}
+    targetRevision: {{ .Values.gitops.targetRevision | quote }}
+    path: platform/foundation
+    helm:
+      parameters:
+        - {name: projectId, value: {{ .Values.platform.projectId | quote }}}
+        - {name: region, value: {{ .Values.platform.region | quote }}}
+        - {name: zone, value: {{ .Values.platform.zone | quote }}}
+        - {name: clusterName, value: {{ .Values.platform.clusterName | quote }}}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: sa-p8
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}
+    retry:
+      limit: 20
+      backoff: {duration: 10s, factor: 2, maxDuration: 3m}
+    syncOptions: [CreateNamespace=true, ServerSideApply=true, SkipDryRunOnMissingResource=true]
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: p9-data
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.gitops.repoURL | quote }}
+    targetRevision: {{ .Values.gitops.targetRevision | quote }}
+    path: platform/data
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: sa-p8
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}
+    retry:
+      limit: 20
+      backoff: {duration: 10s, factor: 2, maxDuration: 3m}
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: p9-backup
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.gitops.repoURL | quote }}
+    targetRevision: {{ .Values.gitops.targetRevision | quote }}
+    path: platform/backup
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: velero
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}
+    retry:
+      limit: 20
+      backoff: {duration: 10s, factor: 2, maxDuration: 3m}
+    syncOptions: [CreateNamespace=true, ServerSideApply=true, SkipDryRunOnMissingResource=true]
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sa-platform-prod
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.gitops.repoURL | quote }}
+    targetRevision: {{ .Values.gitops.targetRevision | quote }}
+    path: environments/prod
+    helm:
+      valueFiles: [values-prod.yaml]
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: sa-p8
+  ignoreDifferences:
+    - group: ""
+      kind: Service
+      jqPathExpressions:
+        - .spec.selector."rollouts-pod-template-hash"
+    - group: apps
+      kind: StatefulSet
+      name: sa-platform-prod-kafka
+      namespace: sa-p8
+      jsonPointers:
+        - /spec/persistentVolumeClaimRetentionPolicy
+        - /spec/revisionHistoryLimit
+        - /spec/updateStrategy/rollingUpdate/partition
+        - /spec/volumeClaimTemplates/0/spec/volumeMode
+        - /spec/volumeClaimTemplates/0/status
+    - group: kyverno.io
+      kind: ClusterPolicy
+      managedFieldsManagers: [kyverno]
+      jsonPointers: [/status]
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}
+    retry:
+      limit: 10
+      backoff: {duration: 10s, factor: 2, maxDuration: 3m}
+    syncOptions: [CreateNamespace=true, ApplyOutOfSyncOnly=true, ServerSideApply=true, RespectIgnoreDifferences=true]

@@ -1,0 +1,57 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: p9-velero
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: default
+  source:
+    repoURL: https://vmware-tanzu.github.io/helm-charts
+    chart: velero
+    targetRevision: 12.2.0
+    helm:
+      values: |
+        initContainers:
+          - name: velero-plugin-for-gcp
+            image: velero/velero-plugin-for-gcp:v1.14.3
+            imagePullPolicy: IfNotPresent
+            volumeMounts:
+              - mountPath: /target
+                name: plugins
+        credentials:
+          useSecret: false
+        serviceAccount:
+          server:
+            create: true
+            name: velero-server
+            annotations:
+              iam.gke.io/gcp-service-account: {{ .Values.platform.veleroGsa | quote }}
+        configuration:
+          backupStorageLocation:
+            - name: default
+              provider: velero.io/gcp
+              bucket: {{ .Values.platform.veleroBucket | quote }}
+              default: true
+              config:
+                serviceAccount: {{ .Values.platform.veleroGsa | quote }}
+          volumeSnapshotLocation: []
+          defaultVolumesToFsBackup: true
+        deployNodeAgent: true
+        nodeAgent:
+          resources:
+            requests: {cpu: 50m, memory: 128Mi}
+            limits: {cpu: 500m, memory: 512Mi}
+        resources:
+          requests: {cpu: 100m, memory: 256Mi}
+          limits: {cpu: 500m, memory: 512Mi}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: velero
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}
+    retry:
+      limit: 10
+      backoff: {duration: 10s, factor: 2, maxDuration: 3m}
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]

@@ -1,4 +1,4 @@
 *.tmp
 *.plaintext.yaml
 .env
-
+environments/prod/templates/sealed-secrets.generated.yaml
