@@ -119,7 +119,3 @@ ingress:
   enabled: true
   className: nginx
   host: ""
-
-sealedSecretExample:
-  enabled: false
-  encryptedValue: ""

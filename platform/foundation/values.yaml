@@ -1,0 +1,5 @@
+projectId: practicas-509615
+region: us-central1
+zone: us-central1-a
+clusterName: sa-cluster-p9
+namespace: sa-p8

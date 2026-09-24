@@ -60,6 +60,8 @@ spec:
         app.kubernetes.io/name: kafka
         app.kubernetes.io/instance: {{ .Release.Name }}
         sa-platform/role: broker
+      annotations:
+        backup.velero.io/backup-volumes: data
     spec:
       serviceAccountName: sa-platform-runtime
       automountServiceAccountToken: false

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: p9-foundation
+description: Controles, RBAC y secretos externos para SA Platform
+type: application
+version: 1.0.0
